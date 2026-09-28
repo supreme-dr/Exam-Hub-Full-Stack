@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}{{ exam.title }}{% endblock %}
+{% block content %}
+
+<div class="glass-card mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">{{ exam.title }}</h2>
+            <p class="text-muted mb-0">{{ questions|length }} questions · {{ exam.duration_minutes }} minutes</p>
+        </div>
+        <div class="text-end">
+            <div class="small text-muted">TIME REMAINING</div>
+            <div id="timer" class="fw-bold" style="font-size:1.8rem;color:#ef4444;">--:--</div>
+        </div>
+    </div>
+    <div class="mt-3">
+        <div class="progress" style="height:8px;">
+            <div id="progressBar" class="progress-bar" style="width:0%;background:linear-gradient(90deg,#667eea,#764ba2);"></div>
+        </div>
+        <small class="text-muted"><span id="answeredCount">0</span> / {{ questions|length }} answered</small>
+    </div>
+</div>
+
+<div id="warnBanner" class="alert alert-warning" style="display:none;">
+    ⚠️ <strong>Warning:</strong> Tab switching detected. This is logged.
+</div>
+
+<form method="POST" id="examForm">
+    <input type="hidden" name="tab_switches" id="tabSwitches" value="0">
+
+    {% for q in questions %}
+    <div class="glass-card mb-3">
+        <h5 class="fw-bold mb-3">
+            Q{{ loop.index }}. {{ q.text }}
+            {% if q.difficulty %}<span class="badge bg-secondary ms-2">{{ q.difficulty }}</span>{% endif %}
+        </h5>
+        {% for letter, option in [('A', q.option_a), ('B', q.option_b), ('C', q.option_c), ('D', q.option_d)] %}
+        <div class="form-check mb-2">
+            <input class="form-check-input answer-radio" type="radio"
+                   name="q_{{ q.id }}" id="q{{ q.id }}_{{ letter }}" value="{{ letter }}">
+            <label class="form-check-label" for="q{{ q.id }}_{{ letter }}" style="cursor:pointer;">
+                <strong>{{ letter }}.</strong> {{ option }}
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="glass-card text-center">
+        <button class="btn btn-primary btn-lg px-5" onclick="return confirm('Submit your exam?');">
+            <i class="bi bi-send-check"></i> Submit Exam
+        </button>
+    </div>
+</form>
+
+<script>
+    // Timer
+    const durationSeconds = {{ exam.duration_minutes * 60 }};
+    let remaining = durationSeconds;
+    const timerEl = document.getElementById('timer');
+
+    function updateTimer() {
+        const m = Math.floor(remaining / 60);
+        const s = remaining % 60;
+        timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        if (remaining <= 60) timerEl.style.color = '#dc2626';
+        if (remaining <= 0) { document.getElementById('examForm').submit(); return; }
+        remaining--;
+    }
+    updateTimer();
+    setInterval(updateTimer, 1000);
+
+    // Progress
+    const totalQuestions = {{ questions|length }};
+    const radios = document.querySelectorAll('.answer-radio');
+    const progressBar = document.getElementById('progressBar');
+    const answeredCount = document.getElementById('answeredCount');
+
+    radios.forEach(r => r.addEventListener('change', updateProgress));
+    function updateProgress() {
+        const answered = new Set();
+        radios.forEach(r => { if (r.checked) answered.add(r.name); });
+        const pct = (answered.size / totalQuestions) * 100;
+        progressBar.style.width = pct + '%';
+        answeredCount.textContent = answered.size;
+    }
+
+    // Tab-switch detection
+    let tabSwitches = 0;
+    const tabSwitchInput = document.getElementById('tabSwitches');
+    const warnBanner = document.getElementById('warnBanner');
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            tabSwitches++;
+            tabSwitchInput.value = tabSwitches;
+            warnBanner.style.display = 'block';
+            warnBanner.textContent = `⚠️ Warning: Tab switching detected (${tabSwitches}). This is logged.`;
+        }
+    });
+</script>
+{% endblock %}

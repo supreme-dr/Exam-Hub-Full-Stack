@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<h1 class="page-title">🛠️ Admin Dashboard</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="glass-card text-center"><div class="text-muted small">EXAMS</div><div class="fw-bold" style="font-size:2rem;">{{ exams|length }}</div></div></div>
+    <div class="col-md-4"><div class="glass-card text-center"><div class="text-muted small">STUDENTS</div><div class="fw-bold" style="font-size:2rem;">{{ total_students }}</div></div></div>
+    <div class="col-md-4"><div class="glass-card text-center"><div class="text-muted small">ATTEMPTS</div><div class="fw-bold" style="font-size:2rem;">{{ total_attempts }}</div></div></div>
+</div>
+
+<!-- Categories -->
+<div class="glass-card mb-4">
+    <h5 class="fw-bold mb-3">📂 Categories</h5>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        {% for cat in categories %}
+            <span class="badge bg-primary p-2">{{ cat.icon }} {{ cat.name }}</span>
+        {% else %}
+            <span class="text-muted">No categories yet.</span>
+        {% endfor %}
+    </div>
+    <form method="POST" action="/admin/category/new" class="row g-2 align-items-end">
+        <div class="col-md-2">
+            <label class="form-label fw-semibold small">ICON</label>
+            <input type="text" name="icon" class="form-control" placeholder="🌐" maxlength="4">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label fw-semibold small">NAME</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Cybersecurity" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-semibold small">DESCRIPTION</label>
+            <input type="text" name="description" class="form-control" placeholder="Short description">
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100">+ Add Category</button>
+        </div>
+    </form>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="text-white fw-bold mb-0">Exams</h3>
+    <a href="/admin/exam/new" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Exam</a>
+</div>
+
+{% if exams %}
+<div class="row g-3">
+    {% for exam in exams %}
+    <div class="col-md-6">
+        <div class="glass-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="fw-bold mb-0">{{ exam.title }}</h5>
+                <span class="badge bg-primary">{{ exam.category.icon }} {{ exam.category.name }}</span>
+            </div>
+            <p class="text-muted small mb-3">
+                {{ exam.duration_minutes }} min · {{ exam.questions|length }} in pool · {{ exam.questions_per_attempt }} per attempt
+            </p>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="/admin/exam/{{ exam.id }}/questions" class="btn btn-sm btn-primary">Questions</a>
+                <a href="/admin/exam/{{ exam.id }}/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <form method="POST" action="/admin/exam/{{ exam.id }}/delete" class="d-inline" onsubmit="return confirm('Delete this exam?');">
+                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="glass-card text-center py-5">
+    <div style="font-size:64px;">📝</div>
+    <h4 class="fw-bold mt-3">No exams yet</h4>
+    <a href="/admin/exam/new" class="btn btn-primary mt-2">Create First Exam</a>
+</div>
+{% endif %}
+{% endblock %}

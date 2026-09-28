@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Review — {{ result.exam.title }}{% endblock %}
+{% block content %}
+
+<div class="glass-card mb-4">
+    <h2 class="fw-bold mb-1">📝 Review: {{ result.exam.title }}</h2>
+    <p class="text-muted mb-0">
+        Score: <strong>{{ result.score }}/{{ result.total_questions }}</strong> ·
+        {{ result.percentage }}% · Grade {{ result.grade }}
+    </p>
+</div>
+
+{% for a in result.answers %}
+<div class="glass-card mb-3" style="border-left: 6px solid {% if a.is_correct %}#43e97b{% else %}#ef4444{% endif %};">
+    <h6 class="fw-bold mb-3">
+        Q{{ loop.index }}. {{ a.question.text }}
+        {% if a.is_correct %}
+            <span class="badge bg-success ms-2">✅ Correct</span>
+        {% else %}
+            <span class="badge bg-danger ms-2">❌ Wrong</span>
+        {% endif %}
+    </h6>
+    <ul class="list-unstyled mb-0 small">
+        {% for letter, opt in [('A', a.question.option_a), ('B', a.question.option_b), ('C', a.question.option_c), ('D', a.question.option_d)] %}
+        <li class="mb-1"
+            {% if letter == a.question.correct_answer %}style="color:#10b981;font-weight:600;"
+            {% elif letter == a.chosen and not a.is_correct %}style="color:#ef4444;text-decoration:line-through;"
+            {% endif %}>
+            {{ letter }}. {{ opt }}
+            {% if letter == a.question.correct_answer %} ← correct{% endif %}
+            {% if letter == a.chosen and not a.is_correct %} ← your answer{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% if not a.chosen %}
+        <small class="text-muted">You skipped this question.</small>
+    {% endif %}
+</div>
+{% endfor %}
+
+<div class="text-center my-4">
+    <a href="/result/{{ result.id }}" class="btn btn-outline-light">← Back to Result</a>
+    <a href="/dashboard" class="btn btn-primary">Back to Exams</a>
+</div>
+{% endblock %}

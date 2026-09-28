@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+
+<h1 class="page-title">📊 Analytics</h1>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="row g-3 mb-4">
+    {% for d in data %}
+    <div class="col-md-4">
+        <div class="glass-card text-center">
+            <h5 class="fw-bold mb-1">{{ d.exam.title }}</h5>
+            <small class="text-muted">{{ d.attempts }} attempts</small>
+            <div style="font-size:2rem;font-weight:800;color:#667eea;">{{ d.avg }}%</div>
+            <small class="text-muted">Average · Pass {{ d.pass_rate }}%</small>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if data %}
+<div class="glass-card mb-4">
+    <h5 class="fw-bold mb-3">Average Score per Exam</h5>
+    <canvas id="examChart" height="100"></canvas>
+</div>
+{% endif %}
+
+{% if category_stats %}
+<div class="glass-card mb-4">
+    <h5 class="fw-bold mb-3">Attempts per Category</h5>
+    <canvas id="catChart" height="100"></canvas>
+</div>
+{% endif %}
+
+<div class="text-center my-4">
+    <a href="/admin/export-results" class="btn btn-primary">
+        <i class="bi bi-download"></i> Export All Results (CSV)
+    </a>
+</div>
+
+<script>
+    {% if data %}
+    new Chart(document.getElementById('examChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ data|map(attribute='exam')|map(attribute='title')|list|tojson }},
+            datasets: [{
+                label: 'Average %',
+                data: {{ data|map(attribute='avg')|list|tojson }},
+                backgroundColor: 'rgba(102,126,234,0.7)',
+                borderRadius: 8,
+            }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } }
+    });
+    {% endif %}
+
+    {% if category_stats %}
+    new Chart(document.getElementById('catChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_stats|map(attribute='category')|map(attribute='name')|list|tojson }},
+            datasets: [{
+                data: {{ category_stats|map(attribute='attempts')|list|tojson }},
+                backgroundColor: ['#667eea','#764ba2','#f093fb','#43e97b','#f59e0b','#3b82f6'],
+            }]
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}

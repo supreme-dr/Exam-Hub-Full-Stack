@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if exam else 'New' }} Exam{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center">
+    <div class="glass-card" style="max-width:560px; width:100%;">
+        <h2 class="fw-bold mb-3">{{ 'Edit Exam' if exam else 'Create New Exam' }}</h2>
+
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label fw-semibold small">TITLE</label>
+                <input type="text" name="title" class="form-control"
+                       value="{{ exam.title if exam else '' }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold small">CATEGORY</label>
+                <select name="category_id" class="form-select" required>
+                    <option value="">-- Select category --</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}"
+                        {% if exam and exam.category_id == cat.id %}selected{% endif %}>
+                        {{ cat.icon }} {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold small">DESCRIPTION</label>
+                <textarea name="description" class="form-control" rows="3">{{ exam.description if exam else '' }}</textarea>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">DURATION (MINUTES)</label>
+                    <input type="number" name="duration_minutes" class="form-control"
+                           value="{{ exam.duration_minutes if exam else 60 }}" min="1" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">QUESTIONS PER ATTEMPT</label>
+                    <input type="number" name="questions_per_attempt" class="form-control"
+                           value="{{ exam.questions_per_attempt if exam else 50 }}" min="1" required>
+                </div>
+            </div>
+
+            <button class="btn btn-primary w-100">
+                {{ 'Save Changes' if exam else 'Create Exam' }}
+            </button>
+            <a href="/admin" class="btn btn-link w-100 mt-2 text-decoration-none">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

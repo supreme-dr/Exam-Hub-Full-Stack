@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Exams{% endblock %}
+{% block content %}
+
+<h1 class="page-title">📚 Choose Your Exam</h1>
+<p style="color:rgba(255,255,255,0.85); margin-bottom:24px;">
+    Pick one or more categories. Each exam gives you <strong>50 random questions</strong>.
+</p>
+
+{% for cat in categories %}
+    {% if cat.exams %}
+    <div class="mb-4">
+        <h3 class="text-white fw-bold mb-3">
+            <span style="font-size:1.5rem;">{{ cat.icon }}</span> {{ cat.name }}
+            <small class="text-white-50 fs-6">— {{ cat.description }}</small>
+        </h3>
+        <div class="row g-3">
+            {% for exam in cat.exams %}
+            <div class="col-md-6">
+                <div class="glass-card h-100 d-flex flex-column">
+                    <h5 class="fw-bold mb-2">{{ exam.title }}</h5>
+                    <p class="text-muted small mb-3">{{ exam.description }}</p>
+                    <div class="mb-3 text-muted small">
+                        <i class="bi bi-clock"></i> {{ exam.duration_minutes }} min
+                        &nbsp;·&nbsp;
+                        <i class="bi bi-list-check"></i> {{ exam.questions|length }} in pool
+                        &nbsp;·&nbsp;
+                        <i class="bi bi-shuffle"></i> {{ exam.questions_per_attempt }} per attempt
+                    </div>
+                    <div class="mt-auto">
+                        {% if exam.id in taken_exam_ids %}
+                            <span class="badge bg-success p-2">✅ Completed</span>
+                        {% elif exam.questions|length == 0 %}
+                            <span class="badge bg-secondary p-2">No questions yet</span>
+                        {% else %}
+                            <a href="/exam/{{ exam.id }}" class="btn btn-primary w-100">Start Exam</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+{% if results %}
+<h2 class="page-title mt-5">🕒 Recent Results</h2>
+<div class="glass-card">
+    <table class="table align-middle mb-0">
+        <thead><tr><th>Exam</th><th>Score</th><th>%</th><th>Date</th></tr></thead>
+        <tbody>
+        {% for r in results %}
+            <tr>
+                <td>{{ r.exam.title }}</td>
+                <td>{{ r.score }}/{{ r.total_questions }}</td>
+                <td><span class="badge {% if r.percentage >= 50 %}bg-success{% else %}bg-danger{% endif %}">{{ r.percentage }}%</span></td>
+                <td class="text-muted small">{{ r.completed_at.strftime('%b %d, %Y %H:%M') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

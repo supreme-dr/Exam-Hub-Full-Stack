@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}My Results{% endblock %}
+{% block content %}
+<h1 class="page-title">📊 My Results</h1>
+{% if results %}
+<div class="glass-card">
+    <table class="table align-middle mb-0">
+        <thead><tr><th>Exam</th><th>Score</th><th>%</th><th>Completed</th><th></th></tr></thead>
+        <tbody>
+        {% for r in results %}
+            <tr>
+                <td class="fw-semibold">{{ r.exam.title }}</td>
+                <td>{{ r.score }}/{{ r.total_questions }}</td>
+                <td><span class="badge {% if r.percentage >= 50 %}bg-success{% else %}bg-danger{% endif %}">{{ r.percentage }}%</span></td>
+                <td class="text-muted small">{{ r.completed_at.strftime('%b %d, %Y %H:%M') }}</td>
+                <td><a href="/result/{{ r.id }}" class="btn btn-sm btn-outline-primary">View</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="glass-card text-center py-5">
+    <div style="font-size:64px;">📭</div>
+    <h4 class="fw-bold mt-3">No results yet</h4>
+    <p class="text-muted mb-3">Take an exam to see your score here.</p>
+    <a href="/dashboard" class="btn btn-primary">Browse Exams</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Your Result{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center">
+    <div class="glass-card text-center" style="max-width:560px;">
+        <div style="font-size:80px;">
+            {% if result.percentage >= 50 %}🎉{% else %}📖{% endif %}
+        </div>
+        <h1 class="fw-bold mt-2">
+            {% if result.percentage >= 50 %}Great job!{% else %}Keep studying{% endif %}
+        </h1>
+        <p class="text-muted mb-4">You finished <strong>{{ result.exam.title }}</strong></p>
+
+        <div class="d-flex justify-content-around py-3 mb-3" style="border-top:1px solid #ddd;border-bottom:1px solid #ddd;">
+            <div>
+                <div class="text-muted small">SCORE</div>
+                <div class="fw-bold" style="font-size:2rem;">{{ result.score }}/{{ result.total_questions }}</div>
+            </div>
+            <div>
+                <div class="text-muted small">PERCENTAGE</div>
+                <div class="fw-bold" style="font-size:2rem;color:{% if result.percentage >= 50 %}#10b981{% else %}#ef4444{% endif %};">
+                    {{ result.percentage }}%
+                </div>
+            </div>
+            <div>
+                <div class="text-muted small">GRADE</div>
+                <div class="fw-bold" style="font-size:2rem;">{{ result.grade }}</div>
+            </div>
+        </div>
+
+        {% if result.tab_switches > 0 %}
+        <div class="alert alert-warning small">
+            ⚠️ Tab switches detected: {{ result.tab_switches }}
+        </div>
+        {% endif %}
+
+        <p class="text-muted small mb-4">
+            Completed: {{ result.completed_at.strftime('%B %d, %Y at %H:%M') }}
+        </p>
+
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <a href="/result/{{ result.id }}/review" class="btn btn-primary px-4">
+                <i class="bi bi-list-check"></i> Review Answers
+            </a>
+            {% if result.percentage >= 80 %}
+            <a href="/result/{{ result.id }}/certificate" class="btn btn-success px-4">
+                <i class="bi bi-award"></i> Certificate
+            </a>
+            {% endif %}
+            <a href="/dashboard" class="btn btn-outline-secondary px-4">Exams</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
